@@ -1,14 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import { getNumbers } from './utils';
 import { Pagination } from './components/Pagination';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { BrowserRouter, useSearchParams } from 'react-router-dom';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const items = getNumbers(1, 42).map(n => `Item ${n}`);
 
 export const App: React.FC = () => {
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const initialPage = Number(searchParams.get('page')) || 1;
+  const initialPerPage = Number(searchParams.get('perPage')) || 5;
+
+  const [itemsPerPage, setItemsPerPage] = useState(initialPerPage);
+  const [currentPage, setCurrentPage] = useState(initialPage);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    params.set('page', currentPage.toString());
+    params.set('perPage', itemsPerPage.toString());
+    setSearchParams(params);
+  }, [currentPage, itemsPerPage, setSearchParams]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -75,4 +90,12 @@ export const App: React.FC = () => {
   );
 };
 
-export default App;
+const AppWrapper: React.FC = () => {
+  return (
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  );
+};
+
+export default AppWrapper;
